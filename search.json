@@ -1,5 +1,40 @@
 [
   {
+    "objectID": "posts/2023-12-02_day2/index.html",
+    "href": "posts/2023-12-02_day2/index.html",
+    "title": "Day 2",
+    "section": "",
+    "text": "library(readr)\nlibrary(stringr)\nlibrary(tidyr)\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nlibrary(purrr)\nsample_data &lt;- read_delim(\"sample.txt\", delim = \":\", col_names = F)\n\nRows: 5 Columns: 2\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \":\"\nchr (2): X1, X2\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\ncubes_to_df &lt;- function(x){\n  x |&gt; \n    str_split(\",\", simplify = T) |&gt; \n    str_squish()-&gt;\n    cube_draws\n  \n  tibble(draws = cube_draws) |&gt; \n    separate_wider_delim(draws, names = c(\"n\", \"color\"), delim = \" \") |&gt; \n    mutate(n = as.numeric(n)) |&gt; \n    pivot_wider(\n      names_from = color, values_from = n\n    )\n}\ncubes_to_df(\"3 blue, 4 red\")\n\n# A tibble: 1 × 2\n   blue   red\n  &lt;dbl&gt; &lt;dbl&gt;\n1     3     4\nsample_data |&gt; \n  mutate(\n    X2 = map(X2, ~.x |&gt; \n               str_split(pattern = \";\", simplify = T) |&gt; \n               str_squish()),\n    dfs = map(X2, ~map(.x, cubes_to_df) |&gt; \n                list_rbind() |&gt; \n                replace_na(list(\n                  red = 0,\n                  green = 0,\n                  blue = 0)\n                ) |&gt; \n                mutate(draw = row_number())\n    )\n  ) |&gt; \n  unnest(dfs) |&gt; \n  mutate(game_numbers = str_extract(X1, r\"(\\d+)\") |&gt; as.numeric()) -&gt;\n  sample_all_games\nsample_all_games |&gt; \n  group_by(game_numbers) |&gt; \n  filter(\n    !any(red  &gt; 12),\n    !any(blue &gt; 14),\n    !any(green &gt; 13)\n  ) |&gt; \n  count(game_numbers) \n\n# A tibble: 3 × 2\n# Groups:   game_numbers [3]\n  game_numbers     n\n         &lt;dbl&gt; &lt;int&gt;\n1            1     3\n2            2     3\n3            5     2\nOk, let’s go!\ninput &lt;- read_delim(\"input.txt\", delim = \":\", col_names = F)\n\nRows: 100 Columns: 2\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \":\"\nchr (2): X1, X2\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\ninput |&gt; \n    mutate(\n    X2 = map(X2, ~.x |&gt; \n               str_split(pattern = \";\", simplify = T) |&gt; \n               str_squish()),\n    dfs = map(X2, ~map(.x, cubes_to_df) |&gt; \n                list_rbind() |&gt; \n                replace_na(list(\n                  red = 0,\n                  green = 0,\n                  blue = 0)\n                ) |&gt; \n                mutate(draw = row_number())\n    )\n  ) |&gt; \n  unnest(dfs) |&gt; \n  mutate(game_numbers = str_extract(X1, r\"(\\d+)\") |&gt; as.numeric()) -&gt;\n  input_all_games\nnrow(input_all_games)\n\n[1] 449\ninput_all_games |&gt; \n  group_by(game_numbers) |&gt; \n  filter(\n    !any(red  &gt; 12),\n    !any(blue &gt; 14),\n    !any(green &gt; 13)\n  ) |&gt; \n  count(game_numbers) |&gt; \n  ungroup() |&gt; \n  pull(game_numbers) |&gt; \n  sum()\n\n[1] 2105"
+  },
+  {
+    "objectID": "posts/2023-12-02_day2/index.html#part-2",
+    "href": "posts/2023-12-02_day2/index.html#part-2",
+    "title": "Day 2",
+    "section": "Part 2",
+    "text": "Part 2\n\ninput_all_games |&gt; \n  group_by(game_numbers) |&gt; \n  summarise(\n    across(\n      red:green, max\n    )\n  ) |&gt; \n  mutate(power = red * blue * green) |&gt; \n  pull(power) |&gt; \n  sum()\n\n[1] 72422"
+  },
+  {
+    "objectID": "posts/2023-12-03_0_intro/index.html",
+    "href": "posts/2023-12-03_0_intro/index.html",
+    "title": "Intro",
+    "section": "",
+    "text": "I’m a few days late to getting started, but I’ll give advent of code a go again. I’m going to mix it up between R and Python this time, but I’ll still be doing everything in RStudio and rendering the site in quarto.\n\n\n\nReuseCC-BY-SA 4.0"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Home",
+    "section": "",
+    "text": "Day 2\n\n\n\n\n\n\n\n\n\n\n\n\nJosef Fruehwald\n\n\n\n\n\n\n  \n\n\n\n\nIntro\n\n\n\n\n\n\n\nintro\n\n\nmeta\n\n\n\n\n\n\n\n\n\n\n\nDec 3, 2023\n\n\nJosef Fruehwald\n\n\n\n\n\n\n  \n\n\n\n\nDay 1 - Calibration Numbers\n\n\n\n\n\n\n\n\n\n\n\n\nDec 1, 2023\n\n\nJosef Fruehwald\n\n\n\n\n\n\nNo matching items\n\nReuseCC-BY-SA 4.0"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this blog\n\n\nReuseCC-BY-SA 4.0"
+  },
+  {
     "objectID": "posts/2023-12-01_day1/index.html",
     "href": "posts/2023-12-01_day1/index.html",
     "title": "Day 1 - Calibration Numbers",
@@ -19,26 +54,5 @@
     "title": "Day 1 - Calibration Numbers",
     "section": "Part 2",
     "text": "Part 2\n\nIt looks like some of the digits are actually spelled out with letters: one, two, three, four, five, six, seven, eight, and nine also count as valid “digits”.\n\nokay…\nI’ll use a named vector for the conversion to numeric.\n\nnum = 1:9\nnames(num) &lt;- as.character(1:9)\nnum\n\n1 2 3 4 5 6 7 8 9 \n1 2 3 4 5 6 7 8 9 \n\n\n\nchr = 1:9\nnames(chr) &lt;- c(\"one\", \"two\",\n                \"three\", \"four\", \"five\",\n                \"six\", \"seven\", \"eight\",\n                \"nine\")\nchr\n\n  one   two three  four  five   six seven eight  nine \n    1     2     3     4     5     6     7     8     9 \n\n\n\nnum_chr &lt;- c(num, chr)\nnum_chr\n\n    1     2     3     4     5     6     7     8     9   one   two three  four \n    1     2     3     4     5     6     7     8     9     1     2     3     4 \n five   six seven eight  nine \n    5     6     7     8     9 \n\n\nAnd now for my big ugly regex\n\nc(\"\\\\d\", names(chr) ) |&gt; \n  str_c(collapse = \"|\")-&gt;\n  pattern\npattern\n\n[1] \"\\\\d|one|two|three|four|five|six|seven|eight|nine\"\n\n\nLet’s try it on the sample.\n\nsample &lt;- (\"two1nine\neightwothree\nabcone2threexyz\nxtwone3four\n4nineeightseven2\nzoneight234\n7pqrstsixteen\") |&gt; \n  str_split(\n    \"\\\\n\",\n  ) |&gt; \n  unlist()\n\n\nIn this example, the calibration values are 29, 83, 13, 24, 42, 14, and 76.\n\n\nsample |&gt; \n  str_extract_all(pattern) |&gt; \n  map(\n    ~c(.x[1], rev(.x)[1])\n  ) |&gt; \n  map(\n    ~num_chr[.x]\n  ) |&gt; \n  map_chr(\n    ~str_c(.x, collapse = \"\")\n  ) |&gt; \n  as.numeric() \n\n[1] 29 83 13 24 42 14 76\n\n\nGreat, let’s try it on the real input!\n\ninput |&gt; \n  str_extract_all(pattern) |&gt; \n  map(\n    ~c(.x[1], rev(.x)[1])\n  ) |&gt; \n  map(\n    ~num_chr[.x]\n  ) |&gt; \n  map_chr(\n    ~str_c(.x, collapse = \"\")\n  ) |&gt; \n  as.numeric() |&gt; \n  sum()\n\n[1] 55309\n\n\n\nBreaking it down\nLet’s make sure we’re getting all the right stuff.\n\nlength(input)\n\n[1] 1000\n\n\n\ninput |&gt; \n  str_extract_all(pattern) |&gt; \n  length()\n\n[1] 1000\n\n\nOk, we’re not losing any lines.\n\ninput |&gt; \n  str_extract_all(pattern) |&gt; \n  map_lgl(~length(.x) &gt;= 2) |&gt; \n  sum()\n\n[1] 936\n\n\nokay… some lines aren’t getting 2 digits.\n\ntoo_short &lt;- input |&gt; \n  str_extract_all(pattern) |&gt; \n  map_lgl(~length(.x) &gt;= 2) \ninput[!too_short][1:10]\n\n [1] \"sqpxs1cgcrmctlgqvzxbcjzgr\" \"llbkdcpxkg1tnmnmrbskpdb\"  \n [3] \"gqlp7\"                     \"5qjlqp\"                   \n [5] \"9j\"                        \"sn6\"                      \n [7] \"4pfcfnfqftbfnxds\"          \"7mgk\"                     \n [9] \"tvmgkxbrtdv6mzcpkf\"        \"5mmrdtrzctqxggtzhplfnphgp\"\n\n\nOk, these aren’t the problem.\n\n\nOverlapping numbers?\nOkay, maybe I need a special function to extract the digits one by one. I can’t tell if overlapping digits should count or not. With str_extract_all(), it extracts \"one\" from the sample string, but not eight.\n\n\"zoneight234\" |&gt; \n  str_extract_all(pattern)\n\n[[1]]\n[1] \"one\" \"2\"   \"3\"   \"4\"  \n\n\n\n\nOverlapping extraction\nTo keep the order of digits, I think I need to use str_locate().\n\npatterns &lt;- names(num_chr)\n\n\nget_digits &lt;- function(str, lookup){\n  \n  patterns &lt;- names(lookup)\n  \n  map(patterns, ~str_locate(str, .x)) |&gt; \n    discard(~is.na(.x[1])) |&gt; \n    map(as_tibble) |&gt; \n    list_rbind() |&gt; \n    arrange(start) |&gt; \n    mutate(\n      digit_chr = str_sub(string = str, start = start, end = end),\n      digit_num = lookup[digit_chr]\n    ) -&gt;\n    all_nums\n  \n  all_nums |&gt; \n      slice(c(1, n())) |&gt; \n      pull(digit_num) |&gt; \n      str_c(collapse = \"\") |&gt; \n      as.numeric()\n            \n}\n\n\ninput |&gt; \n  map(\n    ~get_digits(.x, num_chr)\n  ) |&gt; \n  unlist() |&gt; \n  sum()\n\n[1] 55224\n\n\ndamn, this wasn’t right either.\n\n\nModifying the string.\nGot an idea from here.\n\nreplacements &lt;- str_c(\n  names(chr), chr, names(chr)\n)\nnames(replacements) &lt;- names(chr)\nreplacements\n\n          one           two         three          four          five \n    \"one1one\"     \"two2two\" \"three3three\"   \"four4four\"   \"five5five\" \n          six         seven         eight          nine \n    \"six6six\" \"seven7seven\" \"eight8eight\"   \"nine9nine\" \n\n\n\nreplace_name &lt;- function(line, replacements){\n  for(r in names(replacements)){\n    line = str_replace_all(line, pattern = r, replacement = replacements[r])\n  }\n  return(line)\n}\n\n\ninput |&gt; \n  map_chr(\n    ~replace_name(.x, replacements)\n  ) |&gt; \n  str_extract_all(r\"(\\d)\") |&gt; \n  map(\n    ~c(.x[1], rev(.x)[1])\n  ) |&gt; \n  map_chr(\n    ~str_c(.x, collapse = \"\")\n  ) |&gt; \n  as.numeric() |&gt; \n  sum()\n\n[1] 55291\n\n\nWell, that did it. Day 1 was already pretty ugly!"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this blog\n\n\nReuseCC-BY-SA 4.0"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Home",
-    "section": "",
-    "text": "Intro\n\n\n\n\n\n\n\nintro\n\n\nmeta\n\n\n\n\n\n\n\n\n\n\n\nDec 3, 2023\n\n\nJosef Fruehwald\n\n\n\n\n\n\n  \n\n\n\n\nDay 1 - Calibration Numbers\n\n\n\n\n\n\n\n\n\n\n\n\nDec 1, 2023\n\n\nJosef Fruehwald\n\n\n\n\n\n\nNo matching items\n\nReuseCC-BY-SA 4.0"
-  },
-  {
-    "objectID": "posts/2023-12-03_0_intro/index.html",
-    "href": "posts/2023-12-03_0_intro/index.html",
-    "title": "Intro",
-    "section": "",
-    "text": "I’m a few days late to getting started, but I’ll give advent of code a go again. I’m going to mix it up between R and Python this time, but I’ll still be doing everything in RStudio and rendering the site in quarto.\n\n\n\nReuseCC-BY-SA 4.0"
   }
 ]
