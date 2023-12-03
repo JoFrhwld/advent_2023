@@ -1,0 +1,124 @@
+---
+title: "Day 2"
+---
+
+```{r}
+library(readr)
+library(stringr)
+library(tidyr)
+library(dplyr)
+library(purrr)
+```
+
+```{r}
+sample_data <- read_delim("sample.txt", delim = ":", col_names = F)
+```
+
+```{r}
+cubes_to_df <- function(x){
+  x |> 
+    str_split(",", simplify = T) |> 
+    str_squish()->
+    cube_draws
+  
+  tibble(draws = cube_draws) |> 
+    separate_wider_delim(draws, names = c("n", "color"), delim = " ") |> 
+    mutate(n = as.numeric(n)) |> 
+    pivot_wider(
+      names_from = color, values_from = n
+    )
+}
+cubes_to_df("3 blue, 4 red")
+```
+
+```{r}
+sample_data |> 
+  mutate(
+    X2 = map(X2, ~.x |> 
+               str_split(pattern = ";", simplify = T) |> 
+               str_squish()),
+    dfs = map(X2, ~map(.x, cubes_to_df) |> 
+                list_rbind() |> 
+                replace_na(list(
+                  red = 0,
+                  green = 0,
+                  blue = 0)
+                ) |> 
+                mutate(draw = row_number())
+    )
+  ) |> 
+  unnest(dfs) |> 
+  mutate(game_numbers = str_extract(X1, r"(\d+)") |> as.numeric()) ->
+  sample_all_games
+```
+
+```{r}
+sample_all_games |> 
+  group_by(game_numbers) |> 
+  filter(
+    !any(red  > 12),
+    !any(blue > 14),
+    !any(green > 13)
+  ) |> 
+  count(game_numbers) 
+```
+
+Ok, let's go!
+
+```{r}
+input <- read_delim("input.txt", delim = ":", col_names = F)
+```
+
+```{r}
+input |> 
+    mutate(
+    X2 = map(X2, ~.x |> 
+               str_split(pattern = ";", simplify = T) |> 
+               str_squish()),
+    dfs = map(X2, ~map(.x, cubes_to_df) |> 
+                list_rbind() |> 
+                replace_na(list(
+                  red = 0,
+                  green = 0,
+                  blue = 0)
+                ) |> 
+                mutate(draw = row_number())
+    )
+  ) |> 
+  unnest(dfs) |> 
+  mutate(game_numbers = str_extract(X1, r"(\d+)") |> as.numeric()) ->
+  input_all_games
+```
+
+```{r}
+nrow(input_all_games)
+```
+
+```{r}
+input_all_games |> 
+  group_by(game_numbers) |> 
+  filter(
+    !any(red  > 12),
+    !any(blue > 14),
+    !any(green > 13)
+  ) |> 
+  count(game_numbers) |> 
+  ungroup() |> 
+  pull(game_numbers) |> 
+  sum()
+```
+
+## Part 2
+
+```{r}
+input_all_games |> 
+  group_by(game_numbers) |> 
+  summarise(
+    across(
+      red:green, max
+    )
+  ) |> 
+  mutate(power = red * blue * green) |> 
+  pull(power) |> 
+  sum()
+```
