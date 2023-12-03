@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this blog\n\n\nReuseCC-BY-SA 4.0"
+  },
+  {
+    "objectID": "posts/2023-12-3_0_intro/index.html",
+    "href": "posts/2023-12-3_0_intro/index.html",
+    "title": "Intro",
+    "section": "",
+    "text": "I’m a few days late to getting started, but I’ll give advent of code a go again. I’m going to mix it up between R and Python this time, but I’ll still be doing everything in RStudio and rendering the site in quarto.\n\n\n\nReuseCC-BY-SA 4.0"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Home",
+    "section": "",
+    "text": "Intro\n\n\n\n\n\n\n\nintro\n\n\nmeta\n\n\n\n\n\n\n\n\n\n\n\nDec 3, 2023\n\n\nJosef Fruehwald\n\n\n\n\n\n\nNo matching items\n\nReuseCC-BY-SA 4.0"
+  }
+]
