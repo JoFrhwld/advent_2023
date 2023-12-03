@@ -1,0 +1,255 @@
+---
+title: "Day 1 - Calibration Numbers"
+date: 2023-12-01
+date-modified: last-modified
+---
+
+## Part 1
+
+> On each line, the calibration value can be found by combining the *first digit* and the *last digit* (in that order) to form a single *two-digit number*.
+
+Ok, I'll do this with `stringr`. Plan is to get all the digits, and then grab the first and the last one.
+
+```{r}
+library(readr)
+library(stringr)
+library(purrr)
+library(tibble)
+library(dplyr)
+```
+
+```{r}
+input <- read_lines("input.txt")
+```
+
+```{r}
+str_extract_all(input, pattern = r"(\d)") |> # <1> 
+  map(                                       # <2>
+    ~c(.x[1], rev(.x)[1])                    # <2>
+  ) |>                                       # <2>
+  map_chr(                                   # <3>
+    ~str_c(.x, collapse = "")                # <3>
+  ) |>                                       # <3>
+  as.numeric() |>                            # <4>
+  sum()                                      # <5>
+```
+
+1.  Extract all digits from each line. Returns a list of character vectors.
+2.  Use `map()` to grab the first and last digit. R doesn't have reverse indexing, so to get the last digit you need to reverse it and get the first value.
+3.  Paste the digits together with `str_c()` using `map_chr()` will auto simplify the output to a character vector.
+4.  Coersion to numeric.
+5.  Sum
+
+## Part 2
+
+> It looks like some of the digits are actually *spelled out with letters*: `one`, `two`, `three`, `four`, `five`, `six`, `seven`, `eight`, and `nine` *also* count as valid "digits".
+
+okay...
+
+I'll use a named vector for the conversion to numeric.
+
+```{r}
+num = 1:9
+names(num) <- as.character(1:9)
+num
+```
+
+```{r}
+chr = 1:9
+names(chr) <- c("one", "two",
+                "three", "four", "five",
+                "six", "seven", "eight",
+                "nine")
+chr
+```
+
+```{r}
+num_chr <- c(num, chr)
+num_chr
+```
+
+And now for my big ugly regex
+
+```{r}
+c("\\d", names(chr) ) |> 
+  str_c(collapse = "|")->
+  pattern
+pattern
+```
+
+Let's try it on the sample.
+
+```{r}
+sample <- ("two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen") |> 
+  str_split(
+    "\\n",
+  ) |> 
+  unlist()
+```
+
+> In this example, the calibration values are `29`, `83`, `13`, `24`, `42`, `14`, and `76`.
+
+```{r}
+sample |> 
+  str_extract_all(pattern) |> 
+  map(
+    ~c(.x[1], rev(.x)[1])
+  ) |> 
+  map(
+    ~num_chr[.x]
+  ) |> 
+  map_chr(
+    ~str_c(.x, collapse = "")
+  ) |> 
+  as.numeric() 
+```
+
+Great, let's try it on the real input!
+
+```{r}
+input |> 
+  str_extract_all(pattern) |> 
+  map(
+    ~c(.x[1], rev(.x)[1])
+  ) |> 
+  map(
+    ~num_chr[.x]
+  ) |> 
+  map_chr(
+    ~str_c(.x, collapse = "")
+  ) |> 
+  as.numeric() |> 
+  sum()
+```
+
+### Breaking it down
+
+Let's make sure we're getting all the right stuff.
+
+```{r}
+length(input)
+```
+
+```{r}
+input |> 
+  str_extract_all(pattern) |> 
+  length()
+```
+
+Ok, we're not losing any lines.
+
+```{r}
+input |> 
+  str_extract_all(pattern) |> 
+  map_lgl(~length(.x) >= 2) |> 
+  sum()
+```
+
+okay... some lines aren't getting 2 digits.
+
+```{r}
+too_short <- input |> 
+  str_extract_all(pattern) |> 
+  map_lgl(~length(.x) >= 2) 
+input[!too_short][1:10]
+```
+
+Ok, these aren't the problem.
+
+### Overlapping numbers?
+
+Okay, maybe I need a special function to extract the digits one by one. I can't tell if overlapping digits should count or not. With `str_extract_all()`, it extracts `"one"` from the sample string, but *not* `eight`.
+
+```{r}
+"zoneight234" |> 
+  str_extract_all(pattern)
+```
+
+### Overlapping extraction
+
+To keep the order of digits, I think I need to use `str_locate()`.
+
+```{r}
+patterns <- names(num_chr)
+```
+
+```{r}
+get_digits <- function(str, lookup){
+  
+  patterns <- names(lookup)
+  
+  map(patterns, ~str_locate(str, .x)) |> 
+    discard(~is.na(.x[1])) |> 
+    map(as_tibble) |> 
+    list_rbind() |> 
+    arrange(start) |> 
+    mutate(
+      digit_chr = str_sub(string = str, start = start, end = end),
+      digit_num = lookup[digit_chr]
+    ) ->
+    all_nums
+  
+  all_nums |> 
+      slice(c(1, n())) |> 
+      pull(digit_num) |> 
+      str_c(collapse = "") |> 
+      as.numeric()
+            
+}
+```
+
+```{r}
+input |> 
+  map(
+    ~get_digits(.x, num_chr)
+  ) |> 
+  unlist() |> 
+  sum()
+```
+
+damn, this wasn't right either.
+
+### Modifying the string.
+
+Got an idea from [here](https://github.com/fuglede/adventofcode/blob/master/2023/day01/solutions.py).
+
+```{r}
+replacements <- str_c(
+  names(chr), chr, names(chr)
+)
+names(replacements) <- names(chr)
+replacements
+```
+
+```{r}
+replace_name <- function(line, replacements){
+  for(r in names(replacements)){
+    line = str_replace_all(line, pattern = r, replacement = replacements[r])
+  }
+  return(line)
+}
+```
+
+```{r}
+input |> 
+  map_chr(
+    ~replace_name(.x, replacements)
+  ) |> 
+  str_extract_all(r"(\d)") |> 
+  map(
+    ~c(.x[1], rev(.x)[1])
+  ) |> 
+  map_chr(
+    ~str_c(.x, collapse = "")
+  ) |> 
+  as.numeric() |> 
+  sum()
+```
+
+Well, that did it. Day 1 was already pretty ugly!

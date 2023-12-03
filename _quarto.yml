@@ -8,14 +8,21 @@ license: CC-BY-SA 4.0
 website:
   title: "Advent of Code"
   navbar:
-    right:
+    left:
       - text: Home
         href: index.qmd
+    right: 
+      - icon: github
+        href: https://github.com/JoFrhwld/advent_2023
+      - icon: house-fill
+        href: https://jofrhwld.github.io/
 
 format:
   html:
     theme: superhero
     css: styles.css
+    toc: true
+    code-annotations: hover
 
 editor: visual
 
