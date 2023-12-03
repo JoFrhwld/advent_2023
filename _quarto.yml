@@ -1,0 +1,21 @@
+project:
+  type: website
+  output-dir: _site
+
+author: Josef Fruehwald
+license: CC-BY-SA 4.0
+
+website:
+  title: "Advent of Code"
+  navbar:
+    right:
+      - text: Home
+        href: index.qmd
+
+format:
+  html:
+    theme: superhero
+    css: styles.css
+
+editor: visual
+
