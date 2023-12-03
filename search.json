@@ -1,5 +1,26 @@
 [
   {
+    "objectID": "posts/2023-12-01_day1/index.html",
+    "href": "posts/2023-12-01_day1/index.html",
+    "title": "Day 1 - Calibration Numbers",
+    "section": "",
+    "text": "On each line, the calibration value can be found by combining the first digit and the last digit (in that order) to form a single two-digit number.\n\nOk, I’ll do this with stringr. Plan is to get all the digits, and then grab the first and the last one.\n\nlibrary(readr)\nlibrary(stringr)\nlibrary(purrr)\nlibrary(tibble)\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\n\n\ninput &lt;- read_lines(\"input.txt\")\n\n\n1str_extract_all(input, pattern = r\"(\\d)\") |&gt;\n2  map(\n    ~c(.x[1], rev(.x)[1])\n  ) |&gt;\n3  map_chr(\n    ~str_c(.x, collapse = \"\")\n  ) |&gt;\n4  as.numeric() |&gt;\n5  sum()\n\n\n1\n\nExtract all digits from each line. Returns a list of character vectors.\n\n2\n\nUse map() to grab the first and last digit. R doesn’t have reverse indexing, so to get the last digit you need to reverse it and get the first value.\n\n3\n\nPaste the digits together with str_c() using map_chr() will auto simplify the output to a character vector.\n\n4\n\nCoersion to numeric.\n\n5\n\nSum\n\n\n\n\n[1] 55607"
+  },
+  {
+    "objectID": "posts/2023-12-01_day1/index.html#part-1",
+    "href": "posts/2023-12-01_day1/index.html#part-1",
+    "title": "Day 1 - Calibration Numbers",
+    "section": "",
+    "text": "On each line, the calibration value can be found by combining the first digit and the last digit (in that order) to form a single two-digit number.\n\nOk, I’ll do this with stringr. Plan is to get all the digits, and then grab the first and the last one.\n\nlibrary(readr)\nlibrary(stringr)\nlibrary(purrr)\nlibrary(tibble)\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\n\n\ninput &lt;- read_lines(\"input.txt\")\n\n\n1str_extract_all(input, pattern = r\"(\\d)\") |&gt;\n2  map(\n    ~c(.x[1], rev(.x)[1])\n  ) |&gt;\n3  map_chr(\n    ~str_c(.x, collapse = \"\")\n  ) |&gt;\n4  as.numeric() |&gt;\n5  sum()\n\n\n1\n\nExtract all digits from each line. Returns a list of character vectors.\n\n2\n\nUse map() to grab the first and last digit. R doesn’t have reverse indexing, so to get the last digit you need to reverse it and get the first value.\n\n3\n\nPaste the digits together with str_c() using map_chr() will auto simplify the output to a character vector.\n\n4\n\nCoersion to numeric.\n\n5\n\nSum\n\n\n\n\n[1] 55607"
+  },
+  {
+    "objectID": "posts/2023-12-01_day1/index.html#part-2",
+    "href": "posts/2023-12-01_day1/index.html#part-2",
+    "title": "Day 1 - Calibration Numbers",
+    "section": "Part 2",
+    "text": "Part 2\n\nIt looks like some of the digits are actually spelled out with letters: one, two, three, four, five, six, seven, eight, and nine also count as valid “digits”.\n\nokay…\nI’ll use a named vector for the conversion to numeric.\n\nnum = 1:9\nnames(num) &lt;- as.character(1:9)\nnum\n\n1 2 3 4 5 6 7 8 9 \n1 2 3 4 5 6 7 8 9 \n\n\n\nchr = 1:9\nnames(chr) &lt;- c(\"one\", \"two\",\n                \"three\", \"four\", \"five\",\n                \"six\", \"seven\", \"eight\",\n                \"nine\")\nchr\n\n  one   two three  four  five   six seven eight  nine \n    1     2     3     4     5     6     7     8     9 \n\n\n\nnum_chr &lt;- c(num, chr)\nnum_chr\n\n    1     2     3     4     5     6     7     8     9   one   two three  four \n    1     2     3     4     5     6     7     8     9     1     2     3     4 \n five   six seven eight  nine \n    5     6     7     8     9 \n\n\nAnd now for my big ugly regex\n\nc(\"\\\\d\", names(chr) ) |&gt; \n  str_c(collapse = \"|\")-&gt;\n  pattern\npattern\n\n[1] \"\\\\d|one|two|three|four|five|six|seven|eight|nine\"\n\n\nLet’s try it on the sample.\n\nsample &lt;- (\"two1nine\neightwothree\nabcone2threexyz\nxtwone3four\n4nineeightseven2\nzoneight234\n7pqrstsixteen\") |&gt; \n  str_split(\n    \"\\\\n\",\n  ) |&gt; \n  unlist()\n\n\nIn this example, the calibration values are 29, 83, 13, 24, 42, 14, and 76.\n\n\nsample |&gt; \n  str_extract_all(pattern) |&gt; \n  map(\n    ~c(.x[1], rev(.x)[1])\n  ) |&gt; \n  map(\n    ~num_chr[.x]\n  ) |&gt; \n  map_chr(\n    ~str_c(.x, collapse = \"\")\n  ) |&gt; \n  as.numeric() \n\n[1] 29 83 13 24 42 14 76\n\n\nGreat, let’s try it on the real input!\n\ninput |&gt; \n  str_extract_all(pattern) |&gt; \n  map(\n    ~c(.x[1], rev(.x)[1])\n  ) |&gt; \n  map(\n    ~num_chr[.x]\n  ) |&gt; \n  map_chr(\n    ~str_c(.x, collapse = \"\")\n  ) |&gt; \n  as.numeric() |&gt; \n  sum()\n\n[1] 55309\n\n\n\nBreaking it down\nLet’s make sure we’re getting all the right stuff.\n\nlength(input)\n\n[1] 1000\n\n\n\ninput |&gt; \n  str_extract_all(pattern) |&gt; \n  length()\n\n[1] 1000\n\n\nOk, we’re not losing any lines.\n\ninput |&gt; \n  str_extract_all(pattern) |&gt; \n  map_lgl(~length(.x) &gt;= 2) |&gt; \n  sum()\n\n[1] 936\n\n\nokay… some lines aren’t getting 2 digits.\n\ntoo_short &lt;- input |&gt; \n  str_extract_all(pattern) |&gt; \n  map_lgl(~length(.x) &gt;= 2) \ninput[!too_short][1:10]\n\n [1] \"sqpxs1cgcrmctlgqvzxbcjzgr\" \"llbkdcpxkg1tnmnmrbskpdb\"  \n [3] \"gqlp7\"                     \"5qjlqp\"                   \n [5] \"9j\"                        \"sn6\"                      \n [7] \"4pfcfnfqftbfnxds\"          \"7mgk\"                     \n [9] \"tvmgkxbrtdv6mzcpkf\"        \"5mmrdtrzctqxggtzhplfnphgp\"\n\n\nOk, these aren’t the problem.\n\n\nOverlapping numbers?\nOkay, maybe I need a special function to extract the digits one by one. I can’t tell if overlapping digits should count or not. With str_extract_all(), it extracts \"one\" from the sample string, but not eight.\n\n\"zoneight234\" |&gt; \n  str_extract_all(pattern)\n\n[[1]]\n[1] \"one\" \"2\"   \"3\"   \"4\"  \n\n\n\n\nOverlapping extraction\nTo keep the order of digits, I think I need to use str_locate().\n\npatterns &lt;- names(num_chr)\n\n\nget_digits &lt;- function(str, lookup){\n  \n  patterns &lt;- names(lookup)\n  \n  map(patterns, ~str_locate(str, .x)) |&gt; \n    discard(~is.na(.x[1])) |&gt; \n    map(as_tibble) |&gt; \n    list_rbind() |&gt; \n    arrange(start) |&gt; \n    mutate(\n      digit_chr = str_sub(string = str, start = start, end = end),\n      digit_num = lookup[digit_chr]\n    ) -&gt;\n    all_nums\n  \n  all_nums |&gt; \n      slice(c(1, n())) |&gt; \n      pull(digit_num) |&gt; \n      str_c(collapse = \"\") |&gt; \n      as.numeric()\n            \n}\n\n\ninput |&gt; \n  map(\n    ~get_digits(.x, num_chr)\n  ) |&gt; \n  unlist() |&gt; \n  sum()\n\n[1] 55224\n\n\ndamn, this wasn’t right either.\n\n\nModifying the string.\nGot an idea from here.\n\nreplacements &lt;- str_c(\n  names(chr), chr, names(chr)\n)\nnames(replacements) &lt;- names(chr)\nreplacements\n\n          one           two         three          four          five \n    \"one1one\"     \"two2two\" \"three3three\"   \"four4four\"   \"five5five\" \n          six         seven         eight          nine \n    \"six6six\" \"seven7seven\" \"eight8eight\"   \"nine9nine\" \n\n\n\nreplace_name &lt;- function(line, replacements){\n  for(r in names(replacements)){\n    line = str_replace_all(line, pattern = r, replacement = replacements[r])\n  }\n  return(line)\n}\n\n\ninput |&gt; \n  map_chr(\n    ~replace_name(.x, replacements)\n  ) |&gt; \n  str_extract_all(r\"(\\d)\") |&gt; \n  map(\n    ~c(.x[1], rev(.x)[1])\n  ) |&gt; \n  map_chr(\n    ~str_c(.x, collapse = \"\")\n  ) |&gt; \n  as.numeric() |&gt; \n  sum()\n\n[1] 55291\n\n\nWell, that did it. Day 1 was already pretty ugly!"
+  },
+  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
@@ -7,17 +28,17 @@
     "text": "About this blog\n\n\nReuseCC-BY-SA 4.0"
   },
   {
-    "objectID": "posts/2023-12-3_0_intro/index.html",
-    "href": "posts/2023-12-3_0_intro/index.html",
-    "title": "Intro",
-    "section": "",
-    "text": "I’m a few days late to getting started, but I’ll give advent of code a go again. I’m going to mix it up between R and Python this time, but I’ll still be doing everything in RStudio and rendering the site in quarto.\n\n\n\nReuseCC-BY-SA 4.0"
-  },
-  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Home",
     "section": "",
-    "text": "Intro\n\n\n\n\n\n\n\nintro\n\n\nmeta\n\n\n\n\n\n\n\n\n\n\n\nDec 3, 2023\n\n\nJosef Fruehwald\n\n\n\n\n\n\nNo matching items\n\nReuseCC-BY-SA 4.0"
+    "text": "Intro\n\n\n\n\n\n\n\nintro\n\n\nmeta\n\n\n\n\n\n\n\n\n\n\n\nDec 3, 2023\n\n\nJosef Fruehwald\n\n\n\n\n\n\n  \n\n\n\n\nDay 1 - Calibration Numbers\n\n\n\n\n\n\n\n\n\n\n\n\nDec 1, 2023\n\n\nJosef Fruehwald\n\n\n\n\n\n\nNo matching items\n\nReuseCC-BY-SA 4.0"
+  },
+  {
+    "objectID": "posts/2023-12-03_0_intro/index.html",
+    "href": "posts/2023-12-03_0_intro/index.html",
+    "title": "Intro",
+    "section": "",
+    "text": "I’m a few days late to getting started, but I’ll give advent of code a go again. I’m going to mix it up between R and Python this time, but I’ll still be doing everything in RStudio and rendering the site in quarto.\n\n\n\nReuseCC-BY-SA 4.0"
   }
 ]
